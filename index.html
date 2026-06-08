@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Premium Quote Studio Pro</title>
+
+  <!-- Font Awesome for Blue Tick -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- Best Gujarati & Hindi Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&family=Hind+Vadodara:wght@400;700&family=Baloo+Bhaijaan+2:wght@400;700&family=Mogra&family=Farsan&family=Kalam:wght@400;700&family=Teko:wght@500;700&family=Rajdhani:wght@500;700&family=Rozha+One&family=Amita:wght@400;700&family=Khand:wght@500;700&family=Yantramanav:wght@400;900&family=Poppins:wght@400;700&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --panel-bg: #1e293b;
+      --accent: #0095f6;
+    }
+
+    /* Global Sharp Edges & Anti-White Border Fix */
+    * { 
+      box-sizing: border-box; 
+      -webkit-font-smoothing: antialiased; 
+      border-radius: 0 !important; 
+      border: none;
+      outline: none;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background-color: var(--bg-dark);
+      color: #f1f5f9;
+    }
+
+    /* Editor Panel */
+    .editor-panel {
+      background: var(--panel-bg);
+      padding: 15px 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 15px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .input-group { display: flex; flex-direction: column; gap: 4px; }
+    .input-group label { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 800; }
+    .input-group input, .input-group select {
+      padding: 8px; background: #0f172a; border: 1px solid #334155; color: #fff; font-size: 13px;
+    }
+
+    /* Ratio Controls */
+    .ratio-btn {
+      padding: 8px; background: #334155; border: 1px solid #475569; color: #fff; cursor: pointer; flex: 1; font-size: 11px;
+    }
+    .ratio-btn.active { background: var(--accent); }
+
+    /* Category Slider */
+    #categories {
+      display: flex; gap: 10px; overflow-x: auto; padding: 15px; background: #0f172a; scrollbar-width: none;
+    }
+    #categories::-webkit-scrollbar { display: none; }
+    .cat-item {
+      padding: 8px 18px; background: #1e293b; border: 1px solid #334155; color: #94a3b8; cursor: pointer; white-space: nowrap;
+    }
+    .cat-item.active { background: var(--accent); color: white; }
+
+    /* Main Grid */
+    #quotes-container {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 30px; padding: 30px; max-width: 1400px; margin: 0 auto;
+    }
+
+    /* Aspect Ratios */
+    .ratio-1-1 { aspect-ratio: 1 / 1; }
+    .ratio-9-16 { aspect-ratio: 9 / 16; }
+    .ratio-4-5 { aspect-ratio: 4 / 5; }
+
+    /* THE CARD DESIGN */
+    .quote-card {
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      color: white;
+      border: none !important; 
+    }
+
+    /* Visible Bubbles */
+    .bg-bubble {
+      position: absolute;
+      border-radius: 50% !important;
+      background: rgba(255, 255, 255, 0.18);
+      z-index: 1;
+      filter: blur(50px);
+    }
+
+    .card-content {
+      padding: 35px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      z-index: 5;
+    }
+
+    .header-row { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+
+    /* Insta Style Avatar */
+    .insta-avatar {
+      width: 60px; height: 60px;
+      border-radius: 50% !important;
+      padding: 3px;
+      background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    }
+    .inner-avatar {
+      width: 100%; height: 100%;
+      border-radius: 50% !important;
+      background: #222;
+      border: 2px solid #000;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 24px;
+    }
+
+    .user-meta { line-height: 1.2; }
+    .user-meta .display-name {
+      font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 8px;
+    }
+    
+    /* Font Awesome Blue Tick Style */
+    .v-icon { font-size: 16px; color: rgb(116, 192, 252); }
+
+    .user-meta .handle-label { font-size: 14px; opacity: 0.8; }
+
+    .quote-container {
+      flex-grow: 1; display: flex; align-items: center; justify-content: center; text-align: center;
+    }
+    .inner-quote-wrap { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; }
+
+    .quote-text {
+      white-space: pre-line; word-wrap: break-word; font-weight: 700;
+      line-height: 1.5; text-shadow: 0 4px 10px rgba(0,0,0,0.3); padding: 0 10px;
+    }
+
+    /* Postfix Style */
+    .v-postfix {
+      white-space: pre-line; word-wrap: break-word; font-weight: 700;
+      line-height: 1.5; text-shadow: 0 4px 10px rgba(0,0,0,0.3); padding: 0 10px;
+    }
+
+    .footer-divider { height: 1px; background: rgba(255,255,255,0.2); margin: 0 35px; z-index: 5; }
+    .footer-row { padding: 20px 35px 30px 35px; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
+    .eng-icons { display: flex; gap: 20px; font-size: 24px; }
+    .insights-btn { font-size: 14px; opacity: 0.8; font-weight: 500; }
+
+    /* Themes */
+    .theme-blue { background: linear-gradient(135deg, #2b5876, #4e4376); }
+    .theme-teal { background: linear-gradient(135deg, #134e5e, #71b280); }
+    .theme-insta { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); }
+    .theme-dark { background: #121212; }
+
+    /* Pagination */
+    .pagination-container {
+      display: flex; justify-content: center; align-items: center; gap: 8px; padding: 40px; flex-wrap: wrap;
+    }
+    .page-btn {
+      padding: 8px 14px; background: #1e293b; color: white; border: 1px solid #334155; cursor: pointer; min-width: 40px;
+    }
+    .page-btn.active { background: var(--accent); border-color: var(--accent); }
+    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .save-overlay { position: absolute; top: 10px; right: 10px; z-index: 20; }
+    .btn-save { background: rgba(0,0,0,0.5); color: white; border: 1px solid #555; padding: 4px 8px; font-size: 11px; cursor: pointer; }
+
+    #loader {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+      z-index: 10000; align-items: center; justify-content: center; font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loader">Processing HD Quality...</div>
+
+  <div class="editor-panel">
+    <div class="input-group">
+      <label>Display Name</label>
+      <input type="text" id="brandName" value="Gujju Attitude" oninput="sync()">
+    </div>
+    <div class="input-group">
+      <label>Username</label>
+      <input type="text" id="brandHandle" value="@gujju_attitude • Official" oninput="sync()">
+    </div>
+    <div class="input-group">
+      <label>Postfix Text</label>
+      <input type="text" id="brandPostfix" value="- @gujju_attitude" placeholder="e.g. #Attitude" oninput="sync()">
+    </div>
+    <div class="input-group">
+      <label>Verified Badge</label>
+      <select id="brandTick" onchange="sync()">
+        <option value="inline-block">Show Icon</option>
+        <option value="none">Hide Icon</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Font Family</label>
+      <select id="brandFont" onchange="sync()">
+        <optgroup label="Gujarati / Hindi">
+          <option value="'Noto Sans Gujarati'">Noto Sans</option>
+          <option value="'Baloo Bhaijaan 2'">Baloo Rounded</option>
+          <option value="'Mogra'">Mogra Artistic</option>
+          <option value="'Kalam'">Kalam Handwriting</option>
+          <option value="'Teko'">Teko Bold</option>
+        </optgroup>
+        <optgroup label="Modern Sans">
+          <option value="'Poppins'">Poppins</option>
+          <option value="'Inter'">Inter</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Font Size</label>
+      <input type="range" id="brandSize" min="0.5" max="4.0" step="0.1" value="1.0" oninput="sync()">
+    </div>
+    <div class="input-group">
+      <label>Aspect Ratio</label>
+      <div style="display:flex;">
+        <button class="ratio-btn active" onclick="setR('ratio-1-1', this)">1:1</button>
+        <button class="ratio-btn" onclick="setR('ratio-4-5', this)">4:5</button>
+        <button class="ratio-btn" onclick="setR('ratio-9-16', this)">9:16</button>
+      </div>
+    </div>
+    <div class="input-group">
+        <label>Per Page</label>
+        <select id="perPage" onchange="changeLimit()">
+          <option value="10">10</option>
+          <option value="20" selected>20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="500">500</option>
+          <option value="1000">1000</option>
+        </select>
+    </div>
+    <div class="input-group">
+      <label>Bulk Save</label>
+      <button onclick="downloadAll()" style="background:var(--accent); color:white; padding:8px; cursor:pointer; font-weight:bold;">Download All</button>
+    </div>
+  </div>
+
+  <nav id="categories"></nav>
+  <main id="quotes-container"></main>
+  <div class="pagination-container" id="pagination"></div>
+
+  <script>
+    const API = 'https://script.google.com/macros/s/AKfycbwLeesyNBCPPM-Zx24ZJlsSaNcr2Q0bJaMJiXJIjshE8EnPjBeQgZjOf6Cy7XD_SpuSFQ/exec';
+    const themes = ['theme-blue', 'theme-teal', 'theme-insta', 'theme-dark'];
+    
+    let LIMIT = 20;
+    let currentCategory = '';
+    let currentPage = 1;
+    let currentRatio = 'ratio-1-1';
+
+    async function init() {
+      const res = await fetch(`${API}?mode=listSheets`);
+      const cats = await res.json();
+      const nav = document.getElementById('categories');
+      
+      cats.forEach((c, i) => {
+        const d = document.createElement('div');
+        d.className = 'cat-item' + (i === 0 ? ' active' : '');
+        d.textContent = c;
+        d.onclick = () => {
+          document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
+          d.classList.add('active');
+          currentPage = 1;
+          load(c, 1);
+        };
+        nav.appendChild(d);
+      });
+      if(cats.length) load(cats[0], 1);
+    }
+
+    async function load(sheet, page) {
+      currentCategory = sheet;
+      currentPage = page;
+      const container = document.getElementById('quotes-container');
+      container.innerHTML = "<h3 style='grid-column: 1/-1; text-align:center;'>Loading Studio...</h3>";
+      
+      const res = await fetch(`${API}?sheet=${encodeURIComponent(sheet)}&page=${page}&limit=${LIMIT}`);
+      const json = await res.json();
+      
+      container.innerHTML = "";
+      json.data.forEach((q, i) => {
+        const theme = themes[i % themes.length];
+        const initial = document.getElementById('brandName').value.charAt(0).toUpperCase();
+        
+        const card = document.createElement('div');
+        card.className = `quote-card ${theme} ${currentRatio}`;
+        card.id = `card-${i}`;
+        card.innerHTML = `
+          <div class="bg-bubble" style="width:200px; height:200px; top:-70px; left:-70px;"></div>
+          <div class="bg-bubble" style="width:200px; height:200px; bottom:-70px; right:-70px; background:rgba(0,0,0,0.1);"></div>
+          
+          <div class="save-overlay"><button class="btn-save" onclick="saveHD(${i})">Save HD</button></div>
+          
+          <div class="card-content">
+            <div class="header-row">
+              <div class="insta-avatar"><div class="inner-avatar">${initial}</div></div>
+              <div class="user-meta">
+                <div class="display-name">
+                  <span class="v-name">${document.getElementById('brandName').value}</span>
+                  <i class="fa-solid fa-patch-check v-icon" style="display:${document.getElementById('brandTick').value}"></i>
+                </div>
+                <div class="handle-label v-handle">${document.getElementById('brandHandle').value}</div>
+              </div>
+            </div>
+            <div class="quote-container">
+              <div class="inner-quote-wrap">
+                <div class="quote-text v-text">${q.value}</div>
+                <div class="v-postfix v-text"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="footer-divider"></div>
+          <div class="footer-row"><div class="eng-icons">❤️ 💬 ✈️</div><div class="insights-btn">View Insights</div></div>
+        `;
+        container.appendChild(card);
+      });
+      renderPagination(json.total);
+      sync();
+    }
+
+    function changeLimit() {
+        LIMIT = parseInt(document.getElementById('perPage').value);
+        currentPage = 1;
+        load(currentCategory, 1);
+    }
+
+    function renderPagination(totalItems) {
+      const totalPages = Math.ceil(totalItems / LIMIT);
+      const pagBox = document.getElementById('pagination');
+      pagBox.innerHTML = "";
+      if(totalPages <= 1) return;
+
+      const addBtn = (label, page, isActive = false, isDisabled = false) => {
+        const btn = document.createElement('button');
+        btn.className = 'page-btn' + (isActive ? ' active' : '');
+        btn.textContent = label;
+        btn.disabled = isDisabled;
+        btn.onclick = () => { if(!isActive && !isDisabled) load(currentCategory, page); };
+        pagBox.appendChild(btn);
+      };
+
+      addBtn('Prev', currentPage - 1, false, currentPage === 1);
+      for (let i = 1; i <= totalPages; i++) {
+        if(i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+            addBtn(i, i, i === currentPage);
+        }
+      }
+      addBtn('Next', currentPage + 1, false, currentPage === totalPages);
+    }
+
+    function sync() {
+      const name = document.getElementById('brandName').value;
+      const handle = document.getElementById('brandHandle').value;
+      const postfix = document.getElementById('brandPostfix').value;
+      const tick = document.getElementById('brandTick').value;
+      const font = document.getElementById('brandFont').value;
+      const size = document.getElementById('brandSize').value + "rem";
+      const initial = name.charAt(0).toUpperCase();
+
+      document.querySelectorAll('.v-name').forEach(el => el.textContent = name);
+      document.querySelectorAll('.v-handle').forEach(el => el.textContent = handle);
+      document.querySelectorAll('.v-postfix').forEach(el => {
+          el.textContent = postfix;
+          el.style.fontFamily = font; // Postfix usually looks better in same font
+      });
+      document.querySelectorAll('.v-icon').forEach(el => el.style.display = tick);
+      document.querySelectorAll('.inner-avatar').forEach(el => el.textContent = initial);
+      document.querySelectorAll('.v-text').forEach(el => {
+        el.style.fontFamily = font;
+        el.style.fontSize = size;
+      });
+    }
+
+    function setR(r, btn) {
+      currentRatio = r;
+      document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.quote-card').forEach(c => {
+        c.className = `quote-card ${c.classList[1]} ${r}`;
+      });
+    }
+
+    async function saveHD(idx) {
+      const loader = document.getElementById('loader');
+      loader.style.display = 'flex';
+      const card = document.getElementById(`card-${idx}`);
+      const btn = card.querySelector('.save-overlay');
+      btn.style.visibility = 'hidden';
+
+      try {
+        const canvas = await html2canvas(card, { 
+          scale: 3, 
+          useCORS: true,
+          backgroundColor: null,
+          removeContainer: true
+        });
+        const link = document.createElement('a');
+        link.download = `StudioQuote_${idx}.png`;
+        link.href = canvas.toDataURL('image/png', 1.0);
+        link.click();
+      } finally {
+        btn.style.visibility = 'visible';
+        loader.style.display = 'none';
+      }
+    }
+
+    async function downloadAll() {
+      const cards = document.querySelectorAll('.quote-card');
+      for(let i=0; i<cards.length; i++) {
+        await saveHD(i);
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
