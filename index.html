@@ -335,6 +335,7 @@
       }
 
       // Next & Last
+      pagBox.appendChild(createBtn(totalPages, totalPages, currentPage === totalPages));
       pagBox.appendChild(createBtn('<i class="fa-solid fa-angle-right"></i>', currentPage + 1, currentPage === totalPages));
       pagBox.appendChild(createBtn('<i class="fa-solid fa-angles-right"></i>', totalPages, currentPage === totalPages));
     }
