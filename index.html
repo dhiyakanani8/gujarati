@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Premium Quote Studio Pro</title>
 
-  <!-- Font Awesome for Blue Tick & Pagination Icons -->
+  <!-- Font Awesome for Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
   <!-- Best Gujarati & Hindi Fonts -->
@@ -34,11 +34,12 @@
       background-color: var(--bg-dark);
       color: #f1f5f9;
     }
-    .verified-badge{
-        width:20px;
-        height:20px;
-        margin-left:4px;
-        vertical-align:text-bottom;
+
+    .verified-badge {
+        width: 20px;
+        height: 20px;
+        margin-left: 4px;
+        vertical-align: text-bottom;
     }
 
     /* Editor Panel */
@@ -76,7 +77,7 @@
         bottom: 0;
         top: auto;
         width: 100%;
-        max-height: 70vh;
+        max-height: 75vh;
         overflow-y: auto;
         grid-template-columns: 1fr 1fr;
         transform: translateY(100%);
@@ -139,7 +140,6 @@
     }
 
     .user-meta .display-name { font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 8px; }
-    .v-icon { font-size: 16px; color: rgb(116, 192, 252); }
     .user-meta .handle-label { font-size: 14px; opacity: 0.8; }
 
     .quote-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; text-align: center; }
@@ -195,6 +195,27 @@
         <input type="text" id="emojiSource" value="😎,😀,😁,😂,🤣,😃,😄,😅,😆,😍,😉" oninput="sync(true)">
     </div>
     <div class="input-group">
+      <label>Font Family</label>
+      <select id="brandFont" onchange="sync()">
+        <optgroup label="Gujarati / Hindi">
+          <option value="'Baloo Bhaijaan 2'">Baloo Rounded</option>
+          <option value="'Noto Sans Gujarati'">Noto Sans Gujarati</option>
+          <option value="'Mogra'">Mogra Artistic</option>
+          <option value="'Kalam'">Kalam Handwriting</option>
+          <option value="'Teko'">Teko Bold</option>
+          <option value="'Rajdhani'">Rajdhani SemiBold</option>
+          <option value="'Rozha One'">Rozha Classic</option>
+          <option value="'Amita'">Amita Decorative</option>
+          <option value="'Khand'">Khand Strong</option>
+          <option value="'Yantramanav'">Yantramanav</option>
+        </optgroup>
+        <optgroup label="Modern Sans">
+          <option value="'Poppins'">Poppins</option>
+          <option value="'Inter'">Inter</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="input-group">
       <label>Per Page</label>
       <select id="perPage" onchange="changeLimit()">
         <option value="10">10</option>
@@ -230,6 +251,7 @@
   <script>
     const API = 'https://script.google.com/macros/s/AKfycbwLeesyNBCPPM-Zx24ZJlsSaNcr2Q0bJaMJiXJIjshE8EnPjBeQgZjOf6Cy7XD_SpuSFQ/exec';
     const themes = ['theme-blue', 'theme-teal', 'theme-insta', 'theme-dark'];
+    const VERIFIED_BADGE = "https://raw.githubusercontent.com/dhiyakanani8/gujarati/main/bluetick.png";
     
     let LIMIT = 20;
     let currentCategory = 'Quote';
@@ -284,7 +306,7 @@
             <div class="header-row">
               <div class="insta-avatar"><div class="inner-avatar"></div></div>
               <div class="user-meta">
-                <div class="display-name"><span class="v-name"></span><i class="fa-solid fa-patch-check v-icon"></i></div>
+                <div class="display-name"><span class="v-name"></span></div>
                 <div class="handle-label v-handle"></div>
               </div>
             </div>
@@ -326,11 +348,9 @@
         return btn;
       };
 
-      // First & Prev
       pagBox.appendChild(createBtn('<i class="fa-solid fa-angles-left"></i>', 1, currentPage === 1));
       pagBox.appendChild(createBtn('<i class="fa-solid fa-angle-left"></i>', currentPage - 1, currentPage === 1));
 
-      // Numbers
       const maxVisible = 5;
       let start = Math.max(1, currentPage - 2);
       let end = Math.min(totalPages, start + maxVisible - 1);
@@ -340,8 +360,7 @@
         pagBox.appendChild(createBtn(i, i, false, i === currentPage));
       }
 
-      // Next & Last
-      pagBox.appendChild(createBtn(totalPages, totalPages, currentPage === totalPages));
+      pagBox.appendChild(createBtn(totalPages, totalPages, currentPage === totalPages))
       pagBox.appendChild(createBtn('<i class="fa-solid fa-angle-right"></i>', currentPage + 1, currentPage === totalPages));
       pagBox.appendChild(createBtn('<i class="fa-solid fa-angles-right"></i>', totalPages, currentPage === totalPages));
     }
@@ -350,20 +369,26 @@
       const name = document.getElementById('brandName').value;
       const handle = document.getElementById('brandHandle').value;
       const postfix = document.getElementById('brandPostfix').value;
+      const font = document.getElementById('brandFont').value;
       const size = document.getElementById('brandSize').value + "rem";
       const emojiPool = document.getElementById('emojiSource').value.split(',').map(e => e.trim()).filter(e => e);
 
       document.querySelectorAll('.quote-card').forEach((card) => {
-        const VERIFIED_BADGE = "https://raw.githubusercontent.com/dhiyakanani8/gujarati/main/bluetick.png";
-
-        card.querySelector('.v-name').innerHTML = name ? `${name} <img src="${VERIFIED_BADGE}" class="verified-badge" alt="Verified">` : '';0
-        //card.querySelector('.v-name').innerHTML = name ? `${name} <i class="fa-solid fa-badge-check" style="color:#74c0fc"></i>`: '';
+        card.querySelector('.v-name').innerHTML = name ? `${name} <img src="${VERIFIED_BADGE}" class="verified-badge" alt="Verified">` : '';
         card.querySelector('.v-handle').textContent = handle;
         card.querySelector('.v-postfix').textContent = postfix;
-        card.querySelector('.inner-avatar').textContent = name.charAt(0).toUpperCase();
-        card.querySelector('.v-text').style.fontSize = size;
-        card.querySelector('.v-text-post').style.fontSize = (parseFloat(size) * 0.7) + "rem";
-        card.querySelector('.v-emoji-display').style.fontSize = (parseFloat(size) * 1.2) + "rem";
+        card.querySelector('.inner-avatar').textContent = name ? name.charAt(0).toUpperCase() : '?';
+        
+        const qText = card.querySelector('.v-text');
+        qText.style.fontSize = size;
+        qText.style.fontFamily = font;
+
+        const pText = card.querySelector('.v-text-post');
+        pText.style.fontSize = (parseFloat(size) * 0.7) + "rem";
+        pText.style.fontFamily = font;
+        
+        const eText = card.querySelector('.v-emoji-display');
+        eText.style.fontSize = (parseFloat(size) * 1.2) + "rem";
 
         if(refreshEmojis && emojiPool.length > 0) {
             let selected = [];
@@ -378,7 +403,7 @@
         const text = card.querySelector('.v-text').innerText;
         const emojis = card.querySelector('.v-emoji-display').innerText;
         const postfix = card.querySelector('.v-postfix').innerText;
-        navigator.clipboard.writeText(`${text}\n\n${emojis}\n\n${postfix}`).then(() => alert("Copied!"));
+        navigator.clipboard.writeText(`${text}\n\n${emojis}\n\n${postfix}`).then(() => alert("Copied to Clipboard!"));
     }
 
     function setR(r, btn) {
@@ -399,7 +424,8 @@
       try {
         const canvas = await html2canvas(card, { scale: 3, useCORS: true });
         const link = document.createElement('a');
-        link.download = `${currentCategory.replace(/[^a-z0-9]/gi, '_')}_${idx+1}.png`;
+        const cleanName = currentCategory.replace(/[^a-z0-9]/gi, '_');
+        link.download = `${cleanName}_${idx+1}.png`;
         link.href = canvas.toDataURL('image/png', 1.0);
         link.click();
       } finally {
