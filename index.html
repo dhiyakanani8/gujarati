@@ -20,7 +20,6 @@
       --accent: #0095f6;
     }
 
-    /* Global Sharp Edges & Anti-White Border Fix */
     * { 
       box-sizing: border-box; 
       -webkit-font-smoothing: antialiased; 
@@ -47,6 +46,40 @@
       top: 0;
       z-index: 1000;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      transition: all 0.3s ease;
+    }
+
+    /* Mobile Toggle Button */
+    #mobile-toggle-btn {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 2000;
+      background: var(--accent);
+      color: white;
+      padding: 12px 20px;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      #mobile-toggle-btn { display: block; }
+      .editor-panel {
+        position: fixed;
+        bottom: 0;
+        top: auto;
+        width: 100%;
+        max-height: 60vh;
+        overflow-y: auto;
+        grid-template-columns: 1fr 1fr;
+        transform: translateY(100%);
+        border-top: 2px solid var(--accent) !important;
+      }
+      .editor-panel.active {
+        transform: translateY(0);
+      }
     }
 
     .input-group { display: flex; flex-direction: column; gap: 4px; }
@@ -77,6 +110,10 @@
       gap: 30px; padding: 30px; max-width: 1400px; margin: 0 auto;
     }
 
+    @media (max-width: 480px) {
+      #quotes-container { grid-template-columns: 1fr; padding: 10px; }
+    }
+
     /* Aspect Ratios */
     .ratio-1-1 { aspect-ratio: 1 / 1; }
     .ratio-9-16 { aspect-ratio: 9 / 16; }
@@ -90,10 +127,8 @@
       display: flex;
       flex-direction: column;
       color: white;
-      border: none !important; 
     }
 
-    /* Visible Bubbles */
     .bg-bubble {
       position: absolute;
       border-radius: 50% !important;
@@ -112,7 +147,6 @@
 
     .header-row { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
 
-    /* Insta Style Avatar */
     .insta-avatar {
       width: 60px; height: 60px;
       border-radius: 50% !important;
@@ -128,14 +162,10 @@
       font-weight: 800; font-size: 24px;
     }
 
-    .user-meta { line-height: 1.2; }
     .user-meta .display-name {
       font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 8px;
     }
-    
-    /* Font Awesome Blue Tick Style */
     .v-icon { font-size: 16px; color: rgb(116, 192, 252); }
-
     .user-meta .handle-label { font-size: 14px; opacity: 0.8; }
 
     .quote-container {
@@ -148,10 +178,10 @@
       line-height: 1.5; text-shadow: 0 4px 10px rgba(0,0,0,0.3); padding: 0 10px;
     }
 
-    /* Postfix Style */
     .v-postfix {
       white-space: pre-line; word-wrap: break-word; font-weight: 700;
       line-height: 1.5; text-shadow: 0 4px 10px rgba(0,0,0,0.3); padding: 0 10px;
+      opacity: 0.9;
     }
 
     .footer-divider { height: 1px; background: rgba(255,255,255,0.2); margin: 0 35px; z-index: 5; }
@@ -159,21 +189,18 @@
     .eng-icons { display: flex; gap: 20px; font-size: 24px; }
     .insights-btn { font-size: 14px; opacity: 0.8; font-weight: 500; }
 
-    /* Themes */
     .theme-blue { background: linear-gradient(135deg, #2b5876, #4e4376); }
     .theme-teal { background: linear-gradient(135deg, #134e5e, #71b280); }
     .theme-insta { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); }
     .theme-dark { background: #121212; }
 
-    /* Pagination */
     .pagination-container {
-      display: flex; justify-content: center; align-items: center; gap: 8px; padding: 40px; flex-wrap: wrap;
+      display: flex; justify-content: center; align-items: center; gap: 8px; padding: 40px; flex-wrap: wrap; margin-bottom: 80px;
     }
     .page-btn {
       padding: 8px 14px; background: #1e293b; color: white; border: 1px solid #334155; cursor: pointer; min-width: 40px;
     }
     .page-btn.active { background: var(--accent); border-color: var(--accent); }
-    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
     .save-overlay { position: absolute; top: 10px; right: 10px; z-index: 20; }
     .btn-save { background: rgba(0,0,0,0.5); color: white; border: 1px solid #555; padding: 4px 8px; font-size: 11px; cursor: pointer; }
@@ -188,18 +215,20 @@
 
   <div id="loader">Processing HD Quality...</div>
 
-  <div class="editor-panel">
+  <div id="mobile-toggle-btn" onclick="toggleEditor()">Edit Design</div>
+
+  <div class="editor-panel" id="main-panel">
     <div class="input-group">
       <label>Display Name</label>
       <input type="text" id="brandName" value="Gujju Attitude" oninput="sync()">
     </div>
     <div class="input-group">
       <label>Username</label>
-      <input type="text" id="brandHandle" value="@gujju_attitude • Official" oninput="sync()">
+      <input type="text" id="brandHandle" value="@gujju_attitude" oninput="sync()">
     </div>
     <div class="input-group">
       <label>Postfix Text</label>
-      <input type="text" id="brandPostfix" value="- @gujju_attitude" placeholder="e.g. #Attitude" oninput="sync()">
+      <input type="text" id="brandPostfix" value="- @gujju_attitude" oninput="sync()">
     </div>
     <div class="input-group">
       <label>Verified Badge</label>
@@ -243,13 +272,10 @@
           <option value="20" selected>20</option>
           <option value="50">50</option>
           <option value="100">100</option>
-          <option value="500">500</option>
-          <option value="1000">1000</option>
         </select>
     </div>
-    <div class="input-group">
-      <label>Bulk Save</label>
-      <button onclick="downloadAll()" style="background:var(--accent); color:white; padding:8px; cursor:pointer; font-weight:bold;">Download All</button>
+    <div class="input-group" style="grid-column: 1/-1;">
+      <button onclick="downloadAll()" style="background:var(--accent); color:white; padding:10px; cursor:pointer; font-weight:bold; width: 100%;">Download All Cards</button>
     </div>
   </div>
 
@@ -262,9 +288,16 @@
     const themes = ['theme-blue', 'theme-teal', 'theme-insta', 'theme-dark'];
     
     let LIMIT = 20;
-    let currentCategory = '';
+    let currentCategory = 'Quote';
     let currentPage = 1;
     let currentRatio = 'ratio-1-1';
+
+    function toggleEditor() {
+      const panel = document.getElementById('main-panel');
+      const btn = document.getElementById('mobile-toggle-btn');
+      panel.classList.toggle('active');
+      btn.textContent = panel.classList.contains('active') ? 'Close Editor' : 'Edit Design';
+    }
 
     async function init() {
       const res = await fetch(`${API}?mode=listSheets`);
@@ -306,9 +339,7 @@
         card.innerHTML = `
           <div class="bg-bubble" style="width:200px; height:200px; top:-70px; left:-70px;"></div>
           <div class="bg-bubble" style="width:200px; height:200px; bottom:-70px; right:-70px; background:rgba(0,0,0,0.1);"></div>
-          
           <div class="save-overlay"><button class="btn-save" onclick="saveHD(${i})">Save HD</button></div>
-          
           <div class="card-content">
             <div class="header-row">
               <div class="insta-avatar"><div class="inner-avatar">${initial}</div></div>
@@ -323,11 +354,10 @@
             <div class="quote-container">
               <div class="inner-quote-wrap">
                 <div class="quote-text v-text">${q.value}</div>
-                <div class="v-postfix v-text"></div>
+                <div class="v-postfix v-text-post"></div>
               </div>
             </div>
           </div>
-          
           <div class="footer-divider"></div>
           <div class="footer-row"><div class="eng-icons">❤️ 💬 ✈️</div><div class="insights-btn">View Insights</div></div>
         `;
@@ -378,15 +408,16 @@
 
       document.querySelectorAll('.v-name').forEach(el => el.textContent = name);
       document.querySelectorAll('.v-handle').forEach(el => el.textContent = handle);
-      document.querySelectorAll('.v-postfix').forEach(el => {
-          el.textContent = postfix;
-          el.style.fontFamily = font; // Postfix usually looks better in same font
-      });
+      document.querySelectorAll('.v-postfix').forEach(el => el.textContent = postfix);
       document.querySelectorAll('.v-icon').forEach(el => el.style.display = tick);
       document.querySelectorAll('.inner-avatar').forEach(el => el.textContent = initial);
       document.querySelectorAll('.v-text').forEach(el => {
         el.style.fontFamily = font;
         el.style.fontSize = size;
+      });
+      document.querySelectorAll('.v-text-post').forEach(el => {
+        el.style.fontFamily = font;
+        el.style.fontSize = (parseFloat(size) * 0.6) + "rem"; // Postfix slightly smaller
       });
     }
 
@@ -403,22 +434,23 @@
       const loader = document.getElementById('loader');
       loader.style.display = 'flex';
       const card = document.getElementById(`card-${idx}`);
-      const btn = card.querySelector('.save-overlay');
-      btn.style.visibility = 'hidden';
+      const overlay = card.querySelector('.save-overlay');
+      overlay.style.display = 'none';
 
       try {
         const canvas = await html2canvas(card, { 
           scale: 3, 
           useCORS: true,
-          backgroundColor: null,
-          removeContainer: true
+          backgroundColor: null
         });
         const link = document.createElement('a');
-        link.download = `StudioQuote_${idx}.png`;
+        // Dynamic name using Current Category
+        const cleanCat = currentCategory.replace(/[^a-z0-9]/gi, '_');
+        link.download = `${cleanCat}_${idx + 1}.png`;
         link.href = canvas.toDataURL('image/png', 1.0);
         link.click();
       } finally {
-        btn.style.visibility = 'visible';
+        overlay.style.display = 'block';
         loader.style.display = 'none';
       }
     }
@@ -427,7 +459,7 @@
       const cards = document.querySelectorAll('.quote-card');
       for(let i=0; i<cards.length; i++) {
         await saveHD(i);
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 1200));
       }
     }
 
