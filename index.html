@@ -212,8 +212,8 @@
     <div class="input-group">
       <label>Aspect Ratio</label>
       <div style="display:flex;">
-        <button class="ratio-btn active" onclick="setR('ratio-1-1', this)">1:1</button>
-        <button class="ratio-btn" onclick="setR('ratio-4-5', this)">4:5</button>
+        <button class="ratio-btn " onclick="setR('ratio-1-1', this)">1:1</button>
+        <button class="ratio-btn active" onclick="setR('ratio-4-5', this)">4:5</button>
         <button class="ratio-btn" onclick="setR('ratio-9-16', this)">9:16</button>
       </div>
     </div>
@@ -233,7 +233,7 @@
     let LIMIT = 20;
     let currentCategory = 'Quote';
     let currentPage = 1;
-    let currentRatio = 'ratio-1-1';
+    let currentRatio = 'ratio-4-5';
 
     function toggleEditor() {
       const panel = document.getElementById('main-panel');
