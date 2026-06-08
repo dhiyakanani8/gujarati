@@ -34,6 +34,12 @@
       background-color: var(--bg-dark);
       color: #f1f5f9;
     }
+    .verified-badge{
+        width:20px;
+        height:20px;
+        margin-left:4px;
+        vertical-align:text-bottom;
+    }
 
     /* Editor Panel */
     .editor-panel {
@@ -348,7 +354,10 @@
       const emojiPool = document.getElementById('emojiSource').value.split(',').map(e => e.trim()).filter(e => e);
 
       document.querySelectorAll('.quote-card').forEach((card) => {
-        card.querySelector('.v-name').textContent = name;
+        const VERIFIED_BADGE = "https://raw.githubusercontent.com/dhiyakanani8/gujarati/main/bluetick.png";
+
+        card.querySelector('.v-name').innerHTML = name ? `${name} <img src="${VERIFIED_BADGE}" class="verified-badge" alt="Verified">` : '';0
+        //card.querySelector('.v-name').innerHTML = name ? `${name} <i class="fa-solid fa-badge-check" style="color:#74c0fc"></i>`: '';
         card.querySelector('.v-handle').textContent = handle;
         card.querySelector('.v-postfix').textContent = postfix;
         card.querySelector('.inner-avatar').textContent = name.charAt(0).toUpperCase();
