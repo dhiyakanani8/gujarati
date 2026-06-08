@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Premium Quote Studio Pro</title>
 
-  <!-- Font Awesome for Blue Tick -->
+  <!-- Font Awesome for Blue Tick & Pagination Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
   <!-- Best Gujarati & Hindi Fonts -->
@@ -70,11 +70,11 @@
         bottom: 0;
         top: auto;
         width: 100%;
-        max-height: 60vh;
+        max-height: 70vh;
         overflow-y: auto;
         grid-template-columns: 1fr 1fr;
         transform: translateY(100%);
-        border-top: 2px solid var(--accent) !important;
+        border-top: 3px solid var(--accent) !important;
       }
       .editor-panel.active { transform: translateY(0); }
     }
@@ -105,6 +105,7 @@
 
     @media (max-width: 480px) { #quotes-container { grid-template-columns: 1fr; padding: 10px; } }
 
+    /* CARD DESIGN */
     .ratio-1-1 { aspect-ratio: 1 / 1; }
     .ratio-9-16 { aspect-ratio: 9 / 16; }
     .ratio-4-5 { aspect-ratio: 4 / 5; }
@@ -152,14 +153,16 @@
     .theme-insta { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); }
     .theme-dark { background: #121212; }
 
-    .pagination-container { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 40px; flex-wrap: wrap; margin-bottom: 80px; }
-    .page-btn { padding: 8px 14px; background: #1e293b; color: white; border: 1px solid #334155; cursor: pointer; }
-    .page-btn.active { background: var(--accent); border-color: var(--accent); }
+    /* Pagination Styling */
+    .pagination-container { display: flex; justify-content: center; align-items: center; gap: 6px; padding: 40px; flex-wrap: wrap; margin-bottom: 80px; }
+    .page-btn { padding: 8px 14px; background: #1e293b; color: white; border: 1px solid #334155; cursor: pointer; min-width: 40px; transition: 0.2s; }
+    .page-btn:hover:not(:disabled) { background: #334155; }
+    .page-btn.active { background: var(--accent); border-color: var(--accent); font-weight: bold; }
+    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
     .save-overlay { position: absolute; top: 10px; right: 10px; z-index: 20; display: flex; gap: 5px; }
     .btn-save { background: rgba(0,0,0,0.6); color: white; padding: 6px 10px; font-size: 11px; cursor: pointer; border: 1px solid #666; font-weight: bold; }
-    .btn-save:hover { background: var(--accent); }
-
+    
     #loader { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; font-size: 20px; }
   </style>
 </head>
@@ -186,33 +189,25 @@
         <input type="text" id="emojiSource" value="😎,😀,😁,😂,🤣,😃,😄,😅,😆,😍,😉" oninput="sync(true)">
     </div>
     <div class="input-group">
-      <label>Verified Badge</label>
-      <select id="brandTick" onchange="sync()">
-        <option value="inline-block">Show Icon</option>
-        <option value="none">Hide Icon</option>
-      </select>
-    </div>
-    <div class="input-group">
-      <label>Font Family</label>
-      <select id="brandFont" onchange="sync()">
-        <optgroup label="Gujarati / Hindi">
-          <option value="'Noto Sans Gujarati'">Noto Sans</option>
-          <option value="'Baloo Bhaijaan 2'">Baloo Rounded</option>
-          <option value="'Mogra'">Mogra Artistic</option>
-          <option value="'Kalam'">Kalam Handwriting</option>
-          <option value="'Teko'">Teko Bold</option>
-        </optgroup>
-        <option value="'Inter'">Modern Inter</option>
+      <label>Per Page</label>
+      <select id="perPage" onchange="changeLimit()">
+        <option value="10">10</option>
+        <option value="20" selected>20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="500">500</option>
+        <option value="1000">1000</option>
+        <option value="2000">2000</option>
       </select>
     </div>
     <div class="input-group">
       <label>Font Size</label>
-      <input type="range" id="brandSize" min="0.5" max="4.0" step="0.1" value="1" oninput="sync()">
+      <input type="range" id="brandSize" min="0.5" max="4.0" step="0.1" value="1.0" oninput="sync()">
     </div>
     <div class="input-group">
       <label>Aspect Ratio</label>
       <div style="display:flex;">
-        <button class="ratio-btn " onclick="setR('ratio-1-1', this)">1:1</button>
+        <button class="ratio-btn" onclick="setR('ratio-1-1', this)">1:1</button>
         <button class="ratio-btn active" onclick="setR('ratio-4-5', this)">4:5</button>
         <button class="ratio-btn" onclick="setR('ratio-9-16', this)">9:16</button>
       </div>
@@ -236,8 +231,7 @@
     let currentRatio = 'ratio-4-5';
 
     function toggleEditor() {
-      const panel = document.getElementById('main-panel');
-      panel.classList.toggle('active');
+      document.getElementById('main-panel').classList.toggle('active');
     }
 
     async function init() {
@@ -263,13 +257,13 @@
       currentPage = page;
       const container = document.getElementById('quotes-container');
       container.innerHTML = "<h3 style='grid-column: 1/-1; text-align:center;'>Loading Studio...</h3>";
+      
       const res = await fetch(`${API}?sheet=${encodeURIComponent(sheet)}&page=${page}&limit=${LIMIT}`);
       const json = await res.json();
       container.innerHTML = "";
       
       json.data.forEach((q, i) => {
         const theme = themes[i % themes.length];
-        const initial = document.getElementById('brandName').value.charAt(0).toUpperCase();
         const card = document.createElement('div');
         card.className = `quote-card ${theme} ${currentRatio}`;
         card.id = `card-${i}`;
@@ -282,11 +276,9 @@
           </div>
           <div class="card-content">
             <div class="header-row">
-              <div class="insta-avatar"><div class="inner-avatar">${initial}</div></div>
+              <div class="insta-avatar"><div class="inner-avatar"></div></div>
               <div class="user-meta">
-                <div class="display-name">
-                  <span class="v-name"></span><i class="fa-solid fa-patch-check v-icon"></i>
-                </div>
+                <div class="display-name"><span class="v-name"></span><i class="fa-solid fa-patch-check v-icon"></i></div>
                 <div class="handle-label v-handle"></div>
               </div>
             </div>
@@ -307,38 +299,65 @@
       sync(true);
     }
 
+    function changeLimit() {
+        LIMIT = parseInt(document.getElementById('perPage').value);
+        currentPage = 1;
+        load(currentCategory, 1);
+    }
+
+    function renderPagination(totalItems) {
+      const totalPages = Math.ceil(totalItems / LIMIT);
+      const pagBox = document.getElementById('pagination');
+      pagBox.innerHTML = "";
+      if(totalPages <= 1) return;
+
+      const createBtn = (label, targetPage, isDisabled = false, isActive = false) => {
+        const btn = document.createElement('button');
+        btn.className = 'page-btn' + (isActive ? ' active' : '');
+        btn.innerHTML = label;
+        btn.disabled = isDisabled;
+        if (!isDisabled) btn.onclick = () => load(currentCategory, targetPage);
+        return btn;
+      };
+
+      // First & Prev
+      pagBox.appendChild(createBtn('<i class="fa-solid fa-angles-left"></i>', 1, currentPage === 1));
+      pagBox.appendChild(createBtn('<i class="fa-solid fa-angle-left"></i>', currentPage - 1, currentPage === 1));
+
+      // Numbers
+      const maxVisible = 5;
+      let start = Math.max(1, currentPage - 2);
+      let end = Math.min(totalPages, start + maxVisible - 1);
+      if (end - start < maxVisible - 1) start = Math.max(1, end - maxVisible + 1);
+
+      for (let i = start; i <= end; i++) {
+        pagBox.appendChild(createBtn(i, i, false, i === currentPage));
+      }
+
+      // Next & Last
+      pagBox.appendChild(createBtn('<i class="fa-solid fa-angle-right"></i>', currentPage + 1, currentPage === totalPages));
+      pagBox.appendChild(createBtn('<i class="fa-solid fa-angles-right"></i>', totalPages, currentPage === totalPages));
+    }
+
     function sync(refreshEmojis = false) {
       const name = document.getElementById('brandName').value;
       const handle = document.getElementById('brandHandle').value;
       const postfix = document.getElementById('brandPostfix').value;
-      const tick = document.getElementById('brandTick').value;
-      const font = document.getElementById('brandFont').value;
       const size = document.getElementById('brandSize').value + "rem";
       const emojiPool = document.getElementById('emojiSource').value.split(',').map(e => e.trim()).filter(e => e);
 
-      document.querySelectorAll('.quote-card').forEach((card, idx) => {
+      document.querySelectorAll('.quote-card').forEach((card) => {
         card.querySelector('.v-name').textContent = name;
         card.querySelector('.v-handle').textContent = handle;
         card.querySelector('.v-postfix').textContent = postfix;
-        card.querySelector('.v-icon').style.display = tick;
         card.querySelector('.inner-avatar').textContent = name.charAt(0).toUpperCase();
-        
-        const qText = card.querySelector('.v-text');
-        qText.style.fontFamily = font;
-        qText.style.fontSize = size;
+        card.querySelector('.v-text').style.fontSize = size;
+        card.querySelector('.v-text-post').style.fontSize = (parseFloat(size) * 0.7) + "rem";
+        card.querySelector('.v-emoji-display').style.fontSize = (parseFloat(size) * 1.2) + "rem";
 
-        const pText = card.querySelector('.v-text-post');
-        pText.style.fontFamily = font;
-        pText.style.fontSize = (parseFloat(size) * 0.7) + "rem";
-        
-        const eText = card.querySelector('.v-emoji-display');
-        eText.style.fontSize = (parseFloat(size) * 1.4) + "rem";
-
-        if(refreshEmojis) {
+        if(refreshEmojis && emojiPool.length > 0) {
             let selected = [];
-            for(let k=0; k<5; k++) {
-                selected.push(emojiPool[Math.floor(Math.random() * emojiPool.length)]);
-            }
+            for(let k=0; k<5; k++) selected.push(emojiPool[Math.floor(Math.random() * emojiPool.length)]);
             card.querySelector('.v-emoji-display').textContent = selected.join('');
         }
       });
@@ -349,27 +368,7 @@
         const text = card.querySelector('.v-text').innerText;
         const emojis = card.querySelector('.v-emoji-display').innerText;
         const postfix = card.querySelector('.v-postfix').innerText;
-        const fullText = `${text}\n\n${emojis}\n\n${postfix}`;
-        
-        navigator.clipboard.writeText(fullText).then(() => {
-            alert("Quote copied to clipboard!");
-        });
-    }
-
-    function renderPagination(totalItems) {
-      const totalPages = Math.ceil(totalItems / LIMIT);
-      const pagBox = document.getElementById('pagination');
-      pagBox.innerHTML = "";
-      if(totalPages <= 1) return;
-      for (let i = 1; i <= totalPages; i++) {
-        if(i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-            const btn = document.createElement('button');
-            btn.className = 'page-btn' + (i === currentPage ? ' active' : '');
-            btn.textContent = i;
-            btn.onclick = () => load(currentCategory, i);
-            pagBox.appendChild(btn);
-        }
-      }
+        navigator.clipboard.writeText(`${text}\n\n${emojis}\n\n${postfix}`).then(() => alert("Copied!"));
     }
 
     function setR(r, btn) {
@@ -390,7 +389,7 @@
       try {
         const canvas = await html2canvas(card, { scale: 3, useCORS: true });
         const link = document.createElement('a');
-        link.download = `${currentCategory.replace(/\s/g, '_')}_${idx+1}.png`;
+        link.download = `${currentCategory.replace(/[^a-z0-9]/gi, '_')}_${idx+1}.png`;
         link.href = canvas.toDataURL('image/png', 1.0);
         link.click();
       } finally {
