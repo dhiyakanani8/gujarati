@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gujju Breakup Noir Studio</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@700;900&family=Baloo+Bhaijaan+2:wght@700;800&family=Hind+Vadodara:wght@700;900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root {
+      --bg-black: #050505;
+      --accent-yellow: #facc15;
+      --text-white: #ffffff;
+      --panel-dark: #0f0f0f;
+      --border-color: #1a1a1a;
+      --sad-red: #ff4d4d;
+    }
+
+    * { box-sizing: border-box; -webkit-font-smoothing: antialiased; border-radius: 0 !important; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background-color: #000;
+      color: #fff;
+    }
+
+    /* --- UI Panel --- */
+    .editor-panel {
+      background: var(--panel-dark);
+      padding: 15px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .input-group { display: flex; flex-direction: column; gap: 4px; }
+    .input-group label { font-size: 10px; color: #555; text-transform: uppercase; font-weight: 800; }
+    .input-group input, .input-group select {
+      padding: 8px; background: #000; border: 1px solid #222; color: #fff; font-size: 12px;
+    }
+
+    .ratio-btn { padding: 8px; background: #111; color: #666; cursor: pointer; flex: 1; font-size: 11px; border: 1px solid #222; }
+    .ratio-btn.active { background: #fff; color: #000; font-weight: bold; border-color: #fff; }
+
+    /* --- Pagination UI --- */
+    .pagination-bar {
+      background: #000;
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .pg-btn {
+      background: #0a0a0a;
+      color: #666;
+      border: 1px solid #222;
+      padding: 8px 15px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .pg-btn:hover:not(:disabled) { background: #fff; color: #000; }
+    .pg-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+    .pg-info { font-size: 11px; font-weight: 900; color: #444; margin: 0 10px; }
+
+    #quotes-container {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 50px; padding: 50px; max-width: 1400px; margin: 0 auto;
+    }
+
+    /* --- BREAKUP NOIR CARD DESIGN --- */
+    .quote-card {
+      width: 100%; position: relative; overflow: hidden; display: flex; flex-direction: column;
+      background: var(--bg-black);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+    }
+
+    .ratio-1-1 { aspect-ratio: 1 / 1; }
+    .ratio-4-5 { aspect-ratio: 4 / 5; }
+    .ratio-9-16 { aspect-ratio: 9 / 16; }
+
+    /* The Melancholy Background Heart */
+    .bg-heart {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 30rem;
+        color: rgba(255, 255, 255, 0.02);
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .vignette {
+        position: absolute; inset: 0;
+        background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.8) 100%);
+        z-index: 2; pointer-events: none;
+    }
+
+    .inner-frame {
+        position: absolute; inset: 25px;
+        border: 1px solid rgba(255,255,255,0.05);
+        z-index: 3; pointer-events: none;
+    }
+
+    .card-body {
+        position: relative; z-index: 10; height: 100%; 
+        padding: 60px 40px; display: flex; flex-direction: column;
+    }
+
+    .header-badge {
+        align-self: center; border-bottom: 1px solid rgba(255,255,255,0.2);
+        padding: 5px 15px; display: flex; align-items: center; gap: 8px;
+        margin-top: 10px;
+    }
+    .header-badge span { font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+    .verified-icon { width: 14px; height: 14px; opacity: 0.7; filter: grayscale(1); }
+
+    .content-area { 
+        flex-grow: 1; display: flex; flex-direction: column; 
+        align-items: center; justify-content: center; text-align: center;
+    }
+
+    .quote-icon { font-size: 50px; color: rgba(255,255,255,0.05); margin-bottom: 10px; }
+    
+    .quote-text { 
+        font-weight: 800; line-height: 1.6; width: 100%; 
+        word-wrap: break-word;
+        text-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    }
+    
+    .line-yellow { color: var(--accent-yellow); }
+    .line-white { color: var(--text-white); }
+    
+    .divider {
+        width: 40px; height: 2px; background: rgba(255,255,255,0.1); margin: 30px 0;
+    }
+
+    .emoji-box { font-size: 1.3rem; margin-bottom: 20px; letter-spacing: 15px; opacity: 0.8; filter: grayscale(0.3); }
+    
+    .footer-text { 
+        font-size: 11px; font-weight: 400; text-transform: uppercase; 
+        letter-spacing: 6px; color: rgba(255,255,255,0.3); 
+    }
+
+    .save-overlay { position: absolute; top: 10px; right: 10px; z-index: 100; }
+    .btn-save { background: rgba(255,255,255,0.1); color: #fff; padding: 5px 10px; font-size: 9px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
+    .btn-save:hover { background: #fff; color: #000; }
+    
+    #loader { display: none; position: fixed; inset: 0; background: #000; z-index: 10000; align-items: center; justify-content: center; letter-spacing: 10px; color: #fff; font-size: 10px; }
+    
+    #categories { display:flex; gap:5px; padding:10px; overflow-x:auto; background: #000; }
+    .cat-btn { padding:6px 12px; background:transparent; cursor:pointer; font-size:11px; border: 1px solid #222; color:#555; }
+    .cat-btn.active { border-color: var(--accent-yellow); color: var(--accent-yellow); }
+  </style>
+</head>
+<body>
+
+  <div id="loader">MENDING HEARTS...</div>
+
+  <div class="editor-panel" id="main-panel">
+    <div class="input-group">
+      <label>Username</label>
+      <input type="text" id="brandName" value="Gujju Atittude" oninput="sync()">
+    </div>
+    <div class="input-group">
+      <label>Sub-text</label>
+      <input type="text" id="brandPostfix" value="Broken Heart Diary" oninput="sync()">
+    </div>
+    <div class="input-group" style="grid-column: span 2;">
+        <label>Sad Emoji Pool</label>
+        <input type="text" id="emojiSource" value="💔, 🥀, 🖤, 🥺, 🌧️, 🚬, 🏚️, 🕯️, 🩹, 👤" oninput="sync(true)">
+    </div>
+    <div class="input-group">
+      <label>Font</label>
+      <select id="brandFont" onchange="sync()">
+        <option value="'Noto Sans Gujarati'">Noto Sans</option>
+        <option value="'Baloo Bhaijaan 2'">Baloo Bold</option>
+        <option value="'Hind Vadodara'">Hind Bold</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Text Size</label>
+      <input type="range" id="brandSize" min="1.0" max="3.0" step="0.1" value="1.8" oninput="sync()">
+    </div>
+    <div class="input-group">
+      <label>Ratio</label>
+      <div style="display:flex;">
+        <button class="ratio-btn" onclick="setR('ratio-1-1', this)">1:1</button>
+        <button class="ratio-btn active" onclick="setR('ratio-4-5', this)">4:5</button>
+        <button class="ratio-btn" onclick="setR('ratio-9-16', this)">9:16</button>
+      </div>
+    </div>
+    <div class="input-group">
+      <label>Action</label>
+      <button onclick="downloadAll()" style="background:#fff; color:#000; padding:8px; cursor:pointer; font-weight:900; border:none;">EXPORT PAGE</button>
+    </div>
+  </div>
+
+  <nav id="categories"></nav>
+
+  <div class="pagination-bar">
+    <div class="input-group" style="flex-direction: row; align-items: center; gap: 10px;">
+        <label>Limit</label>
+        <select id="pageSize" onchange="changePageSize()" style="width: 70px; background: #000; border-color: #222;">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+    <button class="pg-btn" id="btnFirst" onclick="goToPage('first')">First</button>
+    <button class="pg-btn" id="btnPrev" onclick="goToPage('prev')">Prev</button>
+    <span class="pg-info" id="pageDisplay">...</span>
+    <button class="pg-btn" id="btnNext" onclick="goToPage('next')">Next</button>
+    <button class="pg-btn" id="btnRandom" onclick="goToPage('random')">Random</button>
+  </div>
+
+  <main id="quotes-container"></main>
+
+  <script>
+    const API = 'https://script.google.com/macros/s/AKfycbwLeesyNBCPPM-Zx24ZJlsSaNcr2Q0bJaMJiXJIjshE8EnPjBeQgZjOf6Cy7XD_SpuSFQ/exec';
+    const VERIFIED_BADGE = "https://raw.githubusercontent.com/dhiyakanani8/gujarati/main/bluetick.png";
+    
+    let currentRatio = 'ratio-4-5';
+    let allData = [];
+    let currentPage = 1;
+    let itemsPerPage = 20;
+
+    async function init() {
+      const res = await fetch(`${API}?mode=listSheets`);
+      const cats = await res.json();
+      const nav = document.getElementById('categories');
+      cats.forEach((c, i) => {
+        const btn = document.createElement('button');
+        btn.className = `cat-btn ${i === 0 ? 'active' : ''}`;
+        btn.textContent = c;
+        btn.onclick = () => {
+            document.querySelectorAll('.cat-btn').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+            load(c);
+        };
+        nav.appendChild(btn);
+      });
+      if(cats.length) load(cats[0]);
+    }
+
+    async function load(sheet) {
+      const container = document.getElementById('quotes-container');
+      container.innerHTML = "<h3 style='grid-column: 1/-1; text-align:center; color: #444;'>FETCHING SADNESS...</h3>";
+      try {
+        const res = await fetch(`${API}?sheet=${encodeURIComponent(sheet)}&limit=1000`);
+        const json = await res.json();
+        allData = json.data || [];
+        currentPage = 1;
+        renderQuotes();
+      } catch (e) { container.innerHTML = "Connection Lost."; }
+    }
+
+    function renderQuotes() {
+      const container = document.getElementById('quotes-container');
+      container.innerHTML = "";
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageData = allData.slice(start, end);
+
+      pageData.forEach((q, i) => {
+        const card = document.createElement('div');
+        card.className = `quote-card ${currentRatio}`;
+        card.id = `card-${i}`;
+        card.innerHTML = `
+          <div class="vignette"></div>
+          <div class="bg-heart"><i class="fa-solid fa-heart-crack"></i></div>
+          <div class="inner-frame"></div>
+          
+          <div class="save-overlay">
+            <button class="btn-save" onclick="saveHD(${i})">DOWNLOAD</button>
+          </div>
+
+          <div class="card-body">
+            <div class="header-badge">
+                <span class="v-name"></span>
+                <img src="${VERIFIED_BADGE}" class="verified-icon">
+            </div>
+
+            <div class="content-area">
+                <div class="quote-icon"><i class="fa-solid fa-quote-left"></i></div>
+                <div class="quote-text v-text" data-raw="${q.value}"></div>
+                <div class="divider"></div>
+                <div class="emoji-box v-emoji-display"></div>
+                <div class="footer-text v-text-post"></div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      updatePaginationUI();
+      sync(true);
+    }
+
+    function updatePaginationUI() {
+      const totalPages = Math.ceil(allData.length / itemsPerPage) || 1;
+      document.getElementById('pageDisplay').textContent = `${currentPage} / ${totalPages}`;
+      document.getElementById('btnPrev').disabled = (currentPage === 1);
+      document.getElementById('btnFirst').disabled = (currentPage === 1);
+      document.getElementById('btnNext').disabled = (currentPage === totalPages);
+    }
+
+    function goToPage(dir) {
+      const totalPages = Math.ceil(allData.length / itemsPerPage) || 1;
+      if (dir === 'next' && currentPage < totalPages) currentPage++;
+      else if (dir === 'prev' && currentPage > 1) currentPage--;
+      else if (dir === 'first') currentPage = 1;
+      else if (dir === 'random') currentPage = Math.floor(Math.random() * totalPages) + 1;
+      renderQuotes();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function changePageSize() {
+      itemsPerPage = parseInt(document.getElementById('pageSize').value);
+      currentPage = 1;
+      renderQuotes();
+    }
+
+    function formatQuoteLines(text) {
+      const segments = text.split(/([,।!?\n]+)/g);
+      let html = '';
+      let isYellow = true;
+      for (let i = 0; i < segments.length; i += 2) {
+        let line = segments[i] + (segments[i + 1] || '');
+        if (line.trim().length === 0) continue;
+        html += `<span class="${isYellow ? 'line-yellow' : 'line-white'}">${line.trim()}</span><br>`;
+        isYellow = !isYellow;
+      }
+      return html;
+    }
+
+    function sync(refreshEmojis = false) {
+      const name = document.getElementById('brandName').value;
+      const postfix = document.getElementById('brandPostfix').value;
+      const font = document.getElementById('brandFont').value;
+      const size = document.getElementById('brandSize').value + "rem";
+      const emojisRaw = document.getElementById('emojiSource').value;
+      const emojiPool = emojisRaw.split(',').map(e => e.trim()).filter(e => e);
+
+      document.querySelectorAll('.quote-card').forEach((card) => {
+        card.querySelector('.v-name').textContent = name;
+        card.querySelector('.v-text-post').textContent = postfix;
+        
+        const qContainer = card.querySelector('.v-text');
+        qContainer.innerHTML = formatQuoteLines(qContainer.getAttribute('data-raw'));
+        qContainer.style.fontSize = size;
+        qContainer.style.fontFamily = font;
+        
+        if(refreshEmojis && emojiPool.length > 0) {
+            let selected = [];
+            for(let k=0; k<3; k++) {
+                selected.push(emojiPool[Math.floor(Math.random() * emojiPool.length)]);
+            }
+            card.querySelector('.v-emoji-display').textContent = selected.join('');
+        }
+      });
+    }
+
+    function setR(r, btn) {
+      currentRatio = r;
+      document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.quote-card').forEach(c => c.className = `quote-card ${r}`);
+    }
+
+    async function saveHD(idx) {
+      const loader = document.getElementById('loader');
+      loader.style.display = 'flex';
+      const card = document.getElementById(`card-${idx}`);
+      const btn = card.querySelector('.save-overlay');
+      btn.style.opacity = '0';
+      try {
+        const canvas = await html2canvas(card, { scale: 3, useCORS: true, backgroundColor: '#000' });
+        const link = document.createElement('a');
+        link.download = `breakup_noir_${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png', 1.0);
+        link.click();
+      } finally {
+        btn.style.opacity = '1';
+        loader.style.display = 'none';
+      }
+    }
+
+    async function downloadAll() {
+      const cards = document.querySelectorAll('.quote-card');
+      if(!confirm(`Export all ${cards.length} posts?`)) return;
+      for(let i=0; i<cards.length; i++) {
+        await saveHD(i);
+        await new Promise(r => setTimeout(r, 800));
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
