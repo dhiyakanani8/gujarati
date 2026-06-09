@@ -154,11 +154,85 @@
     .eng-icons { display: flex; gap: 20px; font-size: 24px; }
     .insights-btn { font-size: 14px; opacity: 0.8; font-weight: 500; }
 
-    .theme-blue { background: linear-gradient(135deg, #2b5876, #4e4376); }
-    .theme-teal { background: linear-gradient(135deg, #134e5e, #71b280); }
-    .theme-insta { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); }
-    .theme-dark { background: #121212; }
+    .theme-midnight {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+}
 
+.theme-dark-purple {
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+}
+
+.theme-dark-red {
+    background: linear-gradient(135deg, #200122, #6f0000);
+}
+
+.theme-dark-green {
+    background: linear-gradient(135deg, #0b3d2e, #14532d, #1b4332);
+}
+
+.theme-dark-blue {
+    background: linear-gradient(135deg, #000428, #004e92);
+}
+
+.theme-dark-orange {
+    background: linear-gradient(135deg, #3e1f00, #7c2d12, #c2410c);
+}
+
+.theme-dark-pink {
+    background: linear-gradient(135deg, #2b0a3d, #5b0e6e, #8b1e8b);
+}
+
+.theme-dark-cyan {
+    background: linear-gradient(135deg, #003b46, #07575b, #066163);
+}
+
+.theme-dark-royal {
+    background: linear-gradient(135deg, #232526, #414345);
+}
+
+.theme-dark-night {
+    background: linear-gradient(135deg, #141e30, #243b55);
+}
+
+.theme-dark-neon {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+}
+
+.theme-dark-space {
+    background: linear-gradient(135deg, #000000, #1c1c1c, #434343);
+}
+
+.theme-dark-indigo {
+    background: linear-gradient(135deg, #1e130c, #9a8478);
+}
+
+.theme-dark-galaxy {
+    background: linear-gradient(135deg, #20002c, #4a148c, #240046);
+}
+
+.theme-dark-forest {
+    background: linear-gradient(135deg, #081c15, #1b4332, #2d6a4f);
+}
+
+.theme-dark-maroon {
+    background: linear-gradient(135deg, #2d0000, #5c0000, #8b0000);
+}
+
+.theme-dark-ocean {
+    background: linear-gradient(135deg, #001f3f, #003566, #00509d);
+}
+
+.theme-dark-coffee {
+    background: linear-gradient(135deg, #2c1810, #4e342e, #6d4c41);
+}
+
+.theme-dark-violet {
+    background: linear-gradient(135deg, #240046, #3c096c, #5a189a);
+}
+
+.theme-dark-carbon {
+    background: linear-gradient(135deg, #111111, #222222, #333333);
+}
     /* Pagination Styling */
     .pagination-container { display: flex; justify-content: center; align-items: center; gap: 6px; padding: 40px; flex-wrap: wrap; margin-bottom: 80px; }
     .page-btn { padding: 8px 14px; background: #1e293b; color: white; border: 1px solid #334155; cursor: pointer; min-width: 40px; transition: 0.2s; }
@@ -192,7 +266,7 @@
     </div>
     <div class="input-group">
         <label>Emoji Pool</label>
-        <input type="text" id="emojiSource" value="😎,😀,😁,😂,🤣,😃,😄,😅,😆,😍,😉" oninput="sync(true)">
+        <input type="text" id="emojiSource" value="😎, 🖤, 🔥, 😈, 💯, 👑, ⚡, 🦁, 🥶, 🤟, 💪, 😜, 😎,🤙, 🕶️, 🐺, 🚀, 💥, 🎯," oninput="sync(true)">
     </div>
     <div class="input-group">
       <label>Font Family</label>
@@ -250,7 +324,7 @@
 
   <script>
     const API = 'https://script.google.com/macros/s/AKfycbwLeesyNBCPPM-Zx24ZJlsSaNcr2Q0bJaMJiXJIjshE8EnPjBeQgZjOf6Cy7XD_SpuSFQ/exec';
-    const themes = ['theme-blue', 'theme-teal', 'theme-insta', 'theme-dark'];
+    const themes = [ "theme-midnight", "theme-dark-purple", "theme-dark-red", "theme-dark-green", "theme-dark-blue", "theme-dark-orange", "theme-dark-pink", "theme-dark-cyan", "theme-dark-royal", "theme-dark-night", "theme-dark-neon", "theme-dark-space", "theme-dark-indigo", "theme-dark-galaxy", "theme-dark-forest", "theme-dark-maroon", "theme-dark-ocean", "theme-dark-coffee", "theme-dark-violet", "theme-dark-carbon" ];
     const VERIFIED_BADGE = "https://raw.githubusercontent.com/dhiyakanani8/gujarati/main/bluetick.png";
     
     let LIMIT = 20;
@@ -319,7 +393,7 @@
             </div>
           </div>
           <div class="footer-divider"></div>
-          <div class="footer-row"><div class="eng-icons">❤️ 💬 ✈️</div><div class="insights-btn">View Insights</div></div>
+          <div class="footer-row"><div class="eng-icons">❤️ 💬 ✈️</div><div class="insights-btn"></div></div>
         `;
         container.appendChild(card);
       });
@@ -392,7 +466,7 @@
 
         if(refreshEmojis && emojiPool.length > 0) {
             let selected = [];
-            for(let k=0; k<5; k++) selected.push(emojiPool[Math.floor(Math.random() * emojiPool.length)]);
+            for(let k=0; k<5; k++) selected.push(emojiPool[Math.floor(Math.random() * 8)]);
             card.querySelector('.v-emoji-display').textContent = selected.join('');
         }
       });
